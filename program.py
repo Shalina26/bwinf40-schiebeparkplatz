@@ -23,7 +23,7 @@ def make_parkinglot(parked_cars, moving_cars):
     """
     Erstellt aus parked_cars und alphabet die Liste parkinglot mit allen Autos, die ausgeparkt werden sollen.
     Erstellt aus moving_cars ein dict(), dessen key der Buchstabe des Autos und value die Nummer des Parkplatzes ist.
-    Gibt den Autos auf dem Parkplatz einen Index und prüft, welche Autos ausparken können und welche nicht.
+    Gibt den Autos auf dem Parkplatz einen Index und prüft nacheinander alle Autos, ob sie ausparken können oder nicht.
     """
 
     alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
@@ -49,9 +49,60 @@ def make_parkinglot(parked_cars, moving_cars):
     for space in parkinglot:
         index = parkinglot.index(space)
         if index in occupiedlot.values():
-            print(f"{parkinglot[index]}: besetzt")
+            print_result(index, occupiedlot, parkinglot)
         else:
             print(f"{parkinglot[index]}: ")
+
+
+def move_cars(index, occupiedlot, parkinglot):
+    """
+    Prüft, welches Auto aus occupiedlot das Auto blockiert, was ausparken will und prüft, ob es sich um das Vorder- oder
+    Hinterteil handelt, das blockiert.
+    """
+
+    indexItems = 0
+    for key, value in occupiedlot.items():
+        if index == value:
+            div = indexItems % 2
+            if div == 0:
+                check = value + 2
+                result = assign_side_and_number_blocking_back(parkinglot, check)
+            else:
+                check = value - 2
+                result = assign_side_and_number_blocking_front(check)
+        indexItems += 1
+
+    return key, result[0], result[1]
+
+
+def assign_side_and_number_blocking_back(parkinglot, check):
+    if check >= len(parkinglot):
+        number = 2
+        side = "links"
+    else:
+        number = 1
+        side = "rechts"
+
+    return number, side
+
+
+def assign_side_and_number_blocking_front(check):
+    if check <= 0:
+        number = 2
+        side = "rechts"
+    else:
+        number = 1
+        side = "links"
+
+    return number, side
+
+
+def print_result(index, occupiedlot, parkinglot):
+    result = move_cars(index, occupiedlot, parkinglot)
+    crashingCar = "H"
+    number = 1
+
+    print(f"{parkinglot[index]}: {crashingCar} {number} {result[2]}, {result[0].upper()} {result[1]} {result[2]}")
 
 
 if __name__ == '__main__':
