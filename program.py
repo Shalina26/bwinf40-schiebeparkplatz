@@ -18,6 +18,7 @@ def read_input(filename='parkplatz0.txt'):
 
     return parked_cars, moving_cars
 
+
 def make_parkinglot(parked_cars, moving_cars):
     """
     Erstellt aus parked_cars und alphabet die Liste parkinglot mit allen Autos, die ausgeparkt werden sollen.
@@ -62,23 +63,23 @@ def move_cars(parkinglot):
     for x in range(0, len(parkinglot)):
         parking_lot_copy = [["A", 0], ["B", 0], ["C", "H"], ["D", "H"], ["E", 0], ["F", "I"], ["G", "I"]]
         if parking_lot_copy[x][1] != 0:
-            y = x
             while parking_lot_copy[x][1] != 0:
-                if parking_lot_copy[y - 1][1] == 0:
-                    parking_lot_copy[y - 1][1] = parking_lot_copy[y][1]
-                    parking_lot_copy[y][1] = parking_lot_copy[y + 1][1]
-                    parking_lot_copy[y + 1][1] = 0
+                if parking_lot_copy[x - 1][1] == 0:
+                    move_left(parking_lot_copy, 2, x)
                     print(parking_lot_copy[x][0], "move left", parking_lot_copy[x - 1][1])
-                    y -= 1
-                elif parking_lot_copy[y - 1][1] == parking_lot_copy[y][1]:
-                    parking_lot_copy[y - 2][1] = parking_lot_copy[y - 1][1]
-                    parking_lot_copy[y - 1][1] = parking_lot_copy[y][1]
-                    parking_lot_copy[y][1] = 0
+                elif parking_lot_copy[x - 1][1] == parking_lot_copy[x][1]:
+                    move_left(parking_lot_copy, 1, x - 1)
                     print(parking_lot_copy[x][0], "move left", parking_lot_copy[x - 1][1])
         else:
             print(parking_lot_copy[x][0], "free to go")
 
     print_parkinglot(parkinglot)
+
+
+def move_left(parking_lot_copy, steps, current_car_index):
+    for x in range (1, steps + 1):
+        parking_lot_copy[current_car_index - x][1] = parking_lot_copy[current_car_index - x + 1][1]
+        parking_lot_copy[current_car_index - x + 2][1] = 0
 
 
 def print_parkinglot(parkinglot):
