@@ -27,7 +27,7 @@ def make_parkinglot(parked_cars, moving_cars):
 
     alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
                 "U", "V", "W", "X", "Y", "Z"]
-    parkingLot = []
+    parkinglot = []
     end = parked_cars[1]
 
     occupiedlot = {}
@@ -48,48 +48,48 @@ def make_parkinglot(parked_cars, moving_cars):
             if value == count:
                 arr.append(key.upper())
                 arr.remove(0)
-        parkingLot.append(arr)
+        parkinglot.append(arr)
         if letter == end:
             break
         count += 1
 
-    print(parkingLot)
-    return parkingLot
+    print(parkinglot)
+    return parkinglot
 
 
-def parkingLotProblem(parkingLot):
+def move_cars(parkinglot):
 
-    for x in range(0, len(parkingLot)):
-        parkingLotCopy = [["A", 0], ["B", 0], ["C", "H"], ["D", "H"], ["E", 0], ["F", "I"], ["G", "I"]]
-        if parkingLotCopy[x][1] != 0:
+    for x in range(0, len(parkinglot)):
+        parking_lot_copy = [["A", 0], ["B", 0], ["C", "H"], ["D", "H"], ["E", 0], ["F", "I"], ["G", "I"]]
+        if parking_lot_copy[x][1] != 0:
             y = x
-            while parkingLotCopy[x][1] != 0:
-                if parkingLotCopy[y - 1][1] == 0:
-                    parkingLotCopy[y - 1][1] = parkingLotCopy[y][1]
-                    parkingLotCopy[y][1] = parkingLotCopy[y + 1][1]
-                    parkingLotCopy[y + 1][1] = 0
-                    print(parkingLotCopy[x][0], "move left", parkingLotCopy[x - 1][1])
+            while parking_lot_copy[x][1] != 0:
+                if parking_lot_copy[y - 1][1] == 0:
+                    parking_lot_copy[y - 1][1] = parking_lot_copy[y][1]
+                    parking_lot_copy[y][1] = parking_lot_copy[y + 1][1]
+                    parking_lot_copy[y + 1][1] = 0
+                    print(parking_lot_copy[x][0], "move left", parking_lot_copy[x - 1][1])
                     y -= 1
-                elif parkingLotCopy[y - 1][1] == parkingLotCopy[y][1]:
-                    parkingLotCopy[y - 2][1] = parkingLotCopy[y - 1][1]
-                    parkingLotCopy[y - 1][1] = parkingLotCopy[y][1]
-                    parkingLotCopy[y][1] = 0
-                    print(parkingLotCopy[x][0], "move left", parkingLotCopy[x - 1][1])
+                elif parking_lot_copy[y - 1][1] == parking_lot_copy[y][1]:
+                    parking_lot_copy[y - 2][1] = parking_lot_copy[y - 1][1]
+                    parking_lot_copy[y - 1][1] = parking_lot_copy[y][1]
+                    parking_lot_copy[y][1] = 0
+                    print(parking_lot_copy[x][0], "move left", parking_lot_copy[x - 1][1])
         else:
-            print(parkingLotCopy[x][0], "free to go")
+            print(parking_lot_copy[x][0], "free to go")
 
-    printParkingLot(parkingLot)
+    print_parkinglot(parkinglot)
 
 
-def printParkingLot(parkingLot):
-    for x in range(0, len(parkingLot)):
-        if parkingLot[x][1] == 0:
-            print(parkingLot[x][0], "empty")
+def print_parkinglot(parkinglot):
+    for x in range(0, len(parkinglot)):
+        if parkinglot[x][1] == 0:
+            print(parkinglot[x][0], "empty")
         else:
-            print(parkingLot[x][0], "taken")
+            print(parkinglot[x][0], "taken")
 
 
 if __name__ == '__main__':
     parked_cars, moving_cars = read_input()
-    parkingLot = make_parkinglot(parked_cars, moving_cars)
-    parkingLotProblem(parkingLot)
+    parkinglot = make_parkinglot(parked_cars, moving_cars)
+    move_cars(parkinglot)
