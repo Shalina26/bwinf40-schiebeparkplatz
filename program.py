@@ -18,7 +18,6 @@ def read_input(filename='parkplatz0.txt'):
 
     return parked_cars, moving_cars
 
-
 def make_parkinglot(parked_cars, moving_cars):
     """
     Erstellt aus parked_cars und alphabet die Liste parkinglot mit allen Autos, die ausgeparkt werden sollen.
@@ -28,13 +27,8 @@ def make_parkinglot(parked_cars, moving_cars):
 
     alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
                 "U", "V", "W", "X", "Y", "Z"]
-    parkinglot = []
+    parkingLot = []
     end = parked_cars[1]
-
-    for letter in alphabet:
-        parkinglot.append(letter)
-        if letter == end:
-            break
 
     occupiedlot = {}
 
@@ -46,65 +40,56 @@ def make_parkinglot(parked_cars, moving_cars):
 
     print(occupiedlot)
 
-    for space in parkinglot:
-        index = parkinglot.index(space)
-        if index in occupiedlot.values():
-            print_result(index, occupiedlot, parkinglot)
+    count = 0
+    for letter in alphabet:
+        arr = [letter]
+        arr.append(0)
+        for key, value in occupiedlot.items():
+            if value == count:
+                arr.append(key.upper())
+                arr.remove(0)
+        parkingLot.append(arr)
+        if letter == end:
+            break
+        count += 1
+
+    print(parkingLot)
+    return parkingLot
+
+
+def parkingLotProblem(parkingLot):
+
+    for x in range(0, len(parkingLot)):
+        parkingLotCopy = [["A", 0], ["B", 0], ["C", "H"], ["D", "H"], ["E", 0], ["F", "I"], ["G", "I"]]
+        if parkingLotCopy[x][1] != 0:
+            y = x
+            while parkingLotCopy[x][1] != 0:
+                if parkingLotCopy[y - 1][1] == 0:
+                    parkingLotCopy[y - 1][1] = parkingLotCopy[y][1]
+                    parkingLotCopy[y][1] = parkingLotCopy[y + 1][1]
+                    parkingLotCopy[y + 1][1] = 0
+                    print(parkingLotCopy[x][0], "move left", parkingLotCopy[x - 1][1])
+                    y -= 1
+                elif parkingLotCopy[y - 1][1] == parkingLotCopy[y][1]:
+                    parkingLotCopy[y - 2][1] = parkingLotCopy[y - 1][1]
+                    parkingLotCopy[y - 1][1] = parkingLotCopy[y][1]
+                    parkingLotCopy[y][1] = 0
+                    print(parkingLotCopy[x][0], "move left", parkingLotCopy[x - 1][1])
         else:
-            print(f"{parkinglot[index]}: ")
+            print(parkingLotCopy[x][0], "free to go")
+
+    printParkingLot(parkingLot)
 
 
-def move_cars(index, occupiedlot, parkinglot):
-    """
-    Prüft, welches Auto aus occupiedlot das Auto blockiert, was ausparken will und prüft, ob es sich um das Vorder- oder
-    Hinterteil handelt, das blockiert.
-    """
-
-    indexItems = 0
-    for key, value in occupiedlot.items():
-        if index == value:
-            div = indexItems % 2
-            if div == 0:
-                check = value + 2
-                result = assign_side_and_number_blocking_back(parkinglot, check)
-            else:
-                check = value - 2
-                result = assign_side_and_number_blocking_front(check)
-        indexItems += 1
-
-    return key, result[0], result[1]
-
-
-def assign_side_and_number_blocking_back(parkinglot, check):
-    if check >= len(parkinglot):
-        number = 2
-        side = "links"
-    else:
-        number = 1
-        side = "rechts"
-
-    return number, side
-
-
-def assign_side_and_number_blocking_front(check):
-    if check <= 0:
-        number = 2
-        side = "rechts"
-    else:
-        number = 1
-        side = "links"
-
-    return number, side
-
-
-def print_result(index, occupiedlot, parkinglot):
-    result = move_cars(index, occupiedlot, parkinglot)
-    crashingCar = "H"
-    number = 1
-
-    print(f"{parkinglot[index]}: {crashingCar} {number} {result[2]}, {result[0].upper()} {result[1]} {result[2]}")
+def printParkingLot(parkingLot):
+    for x in range(0, len(parkingLot)):
+        if parkingLot[x][1] == 0:
+            print(parkingLot[x][0], "empty")
+        else:
+            print(parkingLot[x][0], "taken")
 
 
 if __name__ == '__main__':
     parked_cars, moving_cars = read_input()
-    make_parkinglot(parked_cars, moving_cars)
+    parkingLot = make_parkinglot(parked_cars, moving_cars)
+    parkingLotProblem(parkingLot)
