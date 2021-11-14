@@ -1,4 +1,5 @@
 from pathlib import Path
+from copy import deepcopy
 
 
 def read_input(filename='parkplatz0.txt'):
@@ -61,7 +62,7 @@ def make_parkinglot(parked_cars, moving_cars):
 def move_cars(parkinglot):
 
     for x in range(0, len(parkinglot)):
-        parking_lot_copy = [["A", 0], ["B", 0], ["C", "H"], ["D", "H"], ["E", 0], ["F", "I"], ["G", "I"]]
+        parking_lot_copy = deepcopy(parkinglot)
         if parking_lot_copy[x][1] != 0:
             while parking_lot_copy[x][1] != 0:
                 if parking_lot_copy[x - 1][1] == 0:
