@@ -62,25 +62,34 @@ def make_parkinglot(parked_cars, moving_cars):
 
 def move_cars(parkinglot):
 
-    for x in range(0, len(parkinglot)):
+    for current_car in range(0, len(parkinglot)):
         parking_lot_copy = deepcopy(parkinglot)
-        if parking_lot_copy[x][1] != 0:
-            while parking_lot_copy[x][1] != 0:
-                if parking_lot_copy[x - 1][1] == 0:
-                    try:
-                        move_right(parking_lot_copy, 1, x + 1)
-                        print(f"{parking_lot_copy[x][0]}: {parking_lot_copy[x + 1][1]} 1 rechts")
-                    except:
-                        move_left(parking_lot_copy, 2, x)
-                        print(f"{parking_lot_copy[x][0]}: {parking_lot_copy[x - 1][1]} 2 links")
-                elif parking_lot_copy[x - 1][1] == parking_lot_copy[x][1]:
-                    try:
-                        move_left(parking_lot_copy, 1, x - 1)
-                        print(f"{parking_lot_copy[x][0]}: {parking_lot_copy[x - 1][1]} 1 links")
-                    except:
-                        move_right(parking_lot_copy, 2, x)
-                        print(f"{parking_lot_copy[x][0]}: {parking_lot_copy[x + 1][1]} 2 rechts")
+        if parking_lot_copy[current_car][1] != 0:
+            while parking_lot_copy[current_car][1] != 0:
+
+                if parking_lot_copy[current_car + 1] == parking_lot_copy[current_car][1]:
+                    moving_car = current_car
+                else:
+                    moving_car = current_car - 1
+
+                # Check if moving only one car is enough
+                if parking_lot_copy[current_car - 1][1] == 0:
+                    if not is_crash_right(parking_lot_copy, moving_car):
+                        move_right(parking_lot_copy, moving_car)
+                        continue
+                    # Todo: Could possibly be moved two places to the left
+
+                if parking_lot_copy[current_car + 1][1] == 0:
+                    if not is_crash_left(parking_lot_copy, current_car):
+                        move_left(parking_lot_copy, moving_car)
+                        continue
+                    # Todo: Could possibly be moved two places to the right
+
+                # Else, move several cars
+                # Todo: Move the correct cars out of the way
+
         else:
+            # No car has to move
             print(f"{parking_lot_copy[x][0]}: ")
 
     print_parkinglot(parkinglot)
@@ -96,6 +105,12 @@ def move_right(parking_lot_copy, steps, current_car_index):
     for x in range(1, steps + 1):
         parking_lot_copy[current_car_index + x][1] = parking_lot_copy[current_car_index + x - 1][1]
         parking_lot_copy[current_car_index + x - 2][1] = 0
+
+
+def is_crash_left(list, position):
+    if position - 1 == letter:
+        return True
+    return False
 
 
 def print_parkinglot(parkinglot):
