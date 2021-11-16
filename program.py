@@ -1,5 +1,6 @@
 from pathlib import Path
 from copy import deepcopy
+import random
 
 
 def read_input(filename='parkplatz0.txt'):
@@ -44,13 +45,13 @@ def make_parkinglot(parked_cars, moving_cars):
 
     count = 0
     for letter in alphabet:
-        arr = [letter]
-        arr.append(0)
+        array = [letter]
+        array.append(0)
         for key, value in occupiedlot.items():
             if value == count:
-                arr.append(key.upper())
-                arr.remove(0)
-        parkinglot.append(arr)
+                array.append(key.upper())
+                array.remove(0)
+        parkinglot.append(array)
         if letter == end:
             break
         count += 1
@@ -66,21 +67,35 @@ def move_cars(parkinglot):
         if parking_lot_copy[x][1] != 0:
             while parking_lot_copy[x][1] != 0:
                 if parking_lot_copy[x - 1][1] == 0:
-                    move_left(parking_lot_copy, 2, x)
-                    print(parking_lot_copy[x][0], "move left", parking_lot_copy[x - 1][1])
+                    try:
+                        move_right(parking_lot_copy, 1, x + 1)
+                        print(f"{parking_lot_copy[x][0]}: {parking_lot_copy[x + 1][1]} 1 rechts")
+                    except:
+                        move_left(parking_lot_copy, 2, x)
+                        print(f"{parking_lot_copy[x][0]}: {parking_lot_copy[x - 1][1]} 2 links")
                 elif parking_lot_copy[x - 1][1] == parking_lot_copy[x][1]:
-                    move_left(parking_lot_copy, 1, x - 1)
-                    print(parking_lot_copy[x][0], "move left", parking_lot_copy[x - 1][1])
+                    try:
+                        move_left(parking_lot_copy, 1, x - 1)
+                        print(f"{parking_lot_copy[x][0]}: {parking_lot_copy[x - 1][1]} 1 links")
+                    except:
+                        move_right(parking_lot_copy, 2, x)
+                        print(f"{parking_lot_copy[x][0]}: {parking_lot_copy[x + 1][1]} 2 rechts")
         else:
-            print(parking_lot_copy[x][0], "free to go")
+            print(f"{parking_lot_copy[x][0]}: ")
 
     print_parkinglot(parkinglot)
 
 
 def move_left(parking_lot_copy, steps, current_car_index):
-    for x in range (1, steps + 1):
+    for x in range(1, steps + 1):
         parking_lot_copy[current_car_index - x][1] = parking_lot_copy[current_car_index - x + 1][1]
         parking_lot_copy[current_car_index - x + 2][1] = 0
+
+
+def move_right(parking_lot_copy, steps, current_car_index):
+    for x in range(1, steps + 1):
+        parking_lot_copy[current_car_index + x][1] = parking_lot_copy[current_car_index + x - 1][1]
+        parking_lot_copy[current_car_index + x - 2][1] = 0
 
 
 def print_parkinglot(parkinglot):
