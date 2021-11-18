@@ -1,6 +1,5 @@
 from pathlib import Path
 from copy import deepcopy
-import random
 
 
 def read_input(filename='parkplatz0.txt'):
@@ -61,85 +60,110 @@ def make_parkinglot(parked_cars, moving_cars):
 
 
 def move_cars(parkinglot):
+    moving_car = None
+    direction = None
 
     for current_car in range(0, len(parkinglot)):
         parking_lot_copy = deepcopy(parkinglot)
+        cars = {}
+        count = 0  # for defining moving_car only once and then changing its value for every step
+        change_to_left = None
+        change_to_right = None
+        overwrite = True
         if parking_lot_copy[current_car][1] != 0:
             while parking_lot_copy[current_car][1] != 0:
+                count += 1
+                if parking_lot_copy[current_car + 1][1] == parking_lot_copy[current_car][1] or change_to_right:
+                    if count == 1:
+                        moving_car = current_car
+                    crash_right = is_crash_right(parking_lot_copy, moving_car)
+                    if not crash_right[0]:  # no crash
+                        cars[parking_lot_copy[current_car][1]] = count
+                        direction = "rechts"
+                        moving_car = move_car_one_right(parking_lot_copy, moving_car, overwrite)
+                    elif crash_right[0] and not crash_right[1]:  # crash against the border
+                        cars[parking_lot_copy[current_car][1]] = count
+                        direction = "links"
+                        moving_car = move_car_one_left(parking_lot_copy, moving_car, overwrite)
+                        change_to_left = True
+                        continue
+                    else:  # another car needs to be moved first
+                        break
 
-                try:
-                    move_right(parking_lot_copy, current_car)
-                except IndexError:
-                    move_left(parking_lot_copy, current_car)
+                if parking_lot_copy[current_car - 1][1] == parking_lot_copy[current_car][1] or change_to_left:
+                    if count == 1:
+                        moving_car = current_car - 1
+                    crash_left = is_crash_left(parking_lot_copy, moving_car)
+                    if not crash_left[0]:                                             # no crash
+                        cars[parking_lot_copy[current_car][1]] = count
+                        direction = "links"
+                        moving_car = move_car_one_left(parking_lot_copy, moving_car, overwrite)
+                    elif crash_left[0] and not crash_left[1]:                       # crash against the border
+                        cars[parking_lot_copy[current_car][1]] = count
+                        direction = "rechts"
+                        moving_car = move_car_one_right(parking_lot_copy, moving_car, overwrite)
+                        change_to_right = True
+                        continue
+                    else:                                                       # another car needs to be moved first
+                        print(parking_lot_copy)
+                        moving_car -= 1
+                        moving_car = move_car_one_left(parking_lot_copy, moving_car, overwrite)
+                        cars[parking_lot_copy[moving_car][1]] = 1
+                        overwrite = False
+                        moving_car = move_car_one_left(parking_lot_copy, moving_car, overwrite)
+                        print(parking_lot_copy)
 
-                if parking_lot_copy[current_car - 1][1] == 0:
-                    try:
-                        move_right(parking_lot_copy, current_car + 1)
-                        print(f"{parking_lot_copy[current_car][0]}: {parking_lot_copy[current_car + 1][1]} 1 rechts")
-                    except IndexError:
-                        move_left(parking_lot_copy, current_car)
-                        print(f"{parking_lot_copy[current_car][0]}: {parking_lot_copy[current_car - 1][1]} 2 links")
-                elif parking_lot_copy[current_car - 1][1] == parking_lot_copy[current_car][1]:
-                    try:
-                        move_left(parking_lot_copy, current_car - 1)
-                        print(f"{parking_lot_copy[current_car][0]}: {parking_lot_copy[current_car - 1][1]} 1 links")
-                    except IndexError:
-                        move_right(parking_lot_copy, current_car)
-                        print(f"{parking_lot_copy[current_car][0]}: {parking_lot_copy[current_car + 1][1]} 2 rechts")
-                else:
-                    pass
+            print(f"{parking_lot_copy[current_car][0]}: {cars} {direction}")
+
         else:
             print(f"{parking_lot_copy[current_car][0]}: ")
 
-    print_parkinglot(parkinglot)
+
+def move_car_one_left(parking_lot_copy, moving_car, overwrite):
+    parking_lot_copy[moving_car - 1][1] = parking_lot_copy[moving_car][1]
+    if overwrite:
+        parking_lot_copy[moving_car + 1][1] = 0
+    moving_car -= 1
+    return moving_car
 
 
-def move_left(parking_lot_copy, current_car):
-    if is_crash_left(parking_lot_copy, current_car):
-        crash_car_index = current_car - 2
-    else:
-        move_car_one_left(parking_lot_copy, current_car)
+def move_car_one_right(parking_lot_copy, moving_car, overwrite):
+    parking_lot_copy[moving_car + 2][1] = parking_lot_copy[moving_car][1]
+    if overwrite:
+        parking_lot_copy[moving_car][1] = 0
+    moving_car += 1
+    return moving_car
 
 
-def move_right(parking_lot_copy, current_car):
-    if is_crash_right(parking_lot_copy, current_car):
-        crash_car_index = current_car + 2
-    else:
-        move_car_one_left(parking_lot_copy, current_car)
-
-
-def move_car_one_left(parking_lot_copy, current_car):
-    parking_lot_copy[current_car - 1][1] = parking_lot_copy[current_car][1]
-    parking_lot_copy[current_car + 1][1] = 0
-    current_car_copy -= 1
-
-
-def move_car_one_right(parking_lot_copy, current_car):
-    parking_lot_copy[current_car + 1][1] = parking_lot_copy[current_car][1]
-    parking_lot_copy[current_car - 1][1] = 0
-
-
-def is_crash_left(parking_lot_copy, current_car):
-    if parking_lot_copy[current_car - 1][1] != 0:
-        return True
-    return False
-
-
-def is_crash_right(parking_lot_copy, current_car):
+def is_crash_left(parking_lot_copy, moving_car):
     try:
-        if parking_lot_copy[current_car + 2][1] != 0:
-            return True
-        return False
-    except IndexError:
-        return True
+        if parking_lot_copy[moving_car - 1][1] != 0:
+            crash = True
+            blocking_car = True
 
-
-def print_parkinglot(parkinglot):
-    for x in range(0, len(parkinglot)):
-        if parkinglot[x][1] == 0:
-            print(parkinglot[x][0], "empty")
         else:
-            print(parkinglot[x][0], "taken")
+            crash = False
+            blocking_car = False
+        return crash, blocking_car
+    except IndexError:
+        crash = True
+        blocking_car = False
+        return crash, blocking_car
+
+
+def is_crash_right(parking_lot_copy, moving_car):
+    try:
+        if parking_lot_copy[moving_car + 2][1] != 0:
+            crash = True
+            blocking_car = True
+        else:
+            crash = False
+            blocking_car = False
+        return crash, blocking_car
+    except IndexError:
+        crash = True
+        blocking_car = False
+        return crash, blocking_car
 
 
 if __name__ == '__main__':
