@@ -40,8 +40,6 @@ def make_parkinglot(parked_cars, moving_cars):
         occupiedlot[letter] = number
         occupiedlot[letter.lower()] = number + 1
 
-    print(occupiedlot)
-
     count = 0
     for letter in alphabet:
         array = [letter]
@@ -67,7 +65,6 @@ def move_cars(parkinglot):
         parking_lot_copy = deepcopy(parkinglot)
         cars = {}
         count = 0  # for defining moving_car only once and then changing its value for every step
-        overwrite = True
         if parking_lot_copy[current_car][1] != 0:
             while parking_lot_copy[current_car][1] != 0:
                 count += 1
@@ -75,30 +72,30 @@ def move_cars(parkinglot):
                 if count == 1:
                     if current_car == len(parkinglot) - 1:
                         moving_car = current_car - 1
-                        moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
+                        moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, direction)
                         continue
 
                     if current_car == 0:
                         moving_car = current_car
-                        moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
+                        moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, direction)
                         continue
 
                     if 0 < current_car < len(parkinglot) - 1:
                         if parking_lot_copy[current_car + 1][1] == parking_lot_copy[current_car][1]:
                             if count == 1:
                                 moving_car = current_car
-                            moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
+                            moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, direction)
                             continue
 
                         elif parking_lot_copy[current_car - 1][1] == parking_lot_copy[current_car][1]:
                             if count == 1:
                                 moving_car = current_car - 1
-                            moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
+                            moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, direction)
                 else:
                     if direction == "links":
-                        moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
+                        moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, direction)
                     else:
-                        moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
+                        moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, direction)
 
             print(f"{parking_lot_copy[current_car][0]}: {cars} {direction}")
 
@@ -130,11 +127,12 @@ def move_left(parking_lot_copy, moving_car, current_car, count, cars, direction)
 
     return moving_car, direction
 
+
 def move_left_recursion():
+    pass
 
 
-
-def move_right(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction):
+def move_right(parking_lot_copy, moving_car, current_car, count, cars, direction):
     crash, blocking_car = is_crash_right(parking_lot_copy, moving_car)
     if not crash:  # no crash
         cars[parking_lot_copy[current_car][1]] = count
