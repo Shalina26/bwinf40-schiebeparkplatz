@@ -67,51 +67,38 @@ def move_cars(parkinglot):
         parking_lot_copy = deepcopy(parkinglot)
         cars = {}
         count = 0  # for defining moving_car only once and then changing its value for every step
-        change_to_left = None
-        change_to_right = None
         overwrite = True
         if parking_lot_copy[current_car][1] != 0:
             while parking_lot_copy[current_car][1] != 0:
                 count += 1
-                if parking_lot_copy[current_car + 1][1] == parking_lot_copy[current_car][1] or change_to_right:
-                    if count == 1:
-                        moving_car = current_car
-                    crash_right = is_crash_right(parking_lot_copy, moving_car)
-                    if not crash_right[0]:  # no crash
-                        cars[parking_lot_copy[current_car][1]] = count
-                        direction = "rechts"
-                        moving_car = move_car_one_right(parking_lot_copy, moving_car, overwrite)
-                    elif crash_right[0] and not crash_right[1]:  # crash against the border
-                        cars[parking_lot_copy[current_car][1]] = count
-                        direction = "links"
-                        moving_car = move_car_one_left(parking_lot_copy, moving_car, overwrite)
-                        change_to_left = True
-                        continue
-                    else:  # another car needs to be moved first
-                        break
 
-                if parking_lot_copy[current_car - 1][1] == parking_lot_copy[current_car][1] or change_to_left:
-                    if count == 1:
+                if count == 1:
+                    if current_car == len(parkinglot) - 1:
                         moving_car = current_car - 1
-                    crash_left = is_crash_left(parking_lot_copy, moving_car)
-                    if not crash_left[0]:                                             # no crash
-                        cars[parking_lot_copy[current_car][1]] = count
-                        direction = "links"
-                        moving_car = move_car_one_left(parking_lot_copy, moving_car, overwrite)
-                    elif crash_left[0] and not crash_left[1]:                       # crash against the border
-                        cars[parking_lot_copy[current_car][1]] = count
-                        direction = "rechts"
-                        moving_car = move_car_one_right(parking_lot_copy, moving_car, overwrite)
-                        change_to_right = True
+                        moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
                         continue
-                    else:                                                       # another car needs to be moved first
-                        print(parking_lot_copy)
-                        moving_car -= 1
-                        moving_car = move_car_one_left(parking_lot_copy, moving_car, overwrite)
-                        cars[parking_lot_copy[moving_car][1]] = 1
-                        overwrite = False
-                        moving_car = move_car_one_left(parking_lot_copy, moving_car, overwrite)
-                        print(parking_lot_copy)
+
+                    if current_car == 0:
+                        moving_car = current_car
+                        moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
+                        continue
+
+                    if 0 < current_car < len(parkinglot) - 1:
+                        if parking_lot_copy[current_car + 1][1] == parking_lot_copy[current_car][1]:
+                            if count == 1:
+                                moving_car = current_car
+                            moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
+                            continue
+
+                        elif parking_lot_copy[current_car - 1][1] == parking_lot_copy[current_car][1]:
+                            if count == 1:
+                                moving_car = current_car - 1
+                            moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
+                else:
+                    if direction == "links":
+                        moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
+                    else:
+                        moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction)
 
             print(f"{parking_lot_copy[current_car][0]}: {cars} {direction}")
 
@@ -119,18 +106,61 @@ def move_cars(parkinglot):
             print(f"{parking_lot_copy[current_car][0]}: ")
 
 
-def move_car_one_left(parking_lot_copy, moving_car, overwrite):
+def move_left(parking_lot_copy, moving_car, current_car, count, cars, direction):
+    crash, blocking_car = is_crash_left(parking_lot_copy, moving_car)
+    if not crash:  # no crash
+        cars[parking_lot_copy[current_car][1]] = count
+        direction = "links"
+        moving_car = move_car_one_left(parking_lot_copy, moving_car)
+    elif crash and not blocking_car:  # crash against the border
+        cars[parking_lot_copy[current_car][1]] = count
+        direction = "rechts"
+        moving_car = move_car_one_right(parking_lot_copy, moving_car)
+    else:  # another car needs to be moved first
+        print("hello")
+        print(parking_lot_copy)
+        moving_car -= 2
+        move_left(parking_lot_copy, moving_car, current_car, count, cars, direction)
+        print("bye")
+        if not cars.get(parking_lot_copy[moving_car][1]):
+            cars[parking_lot_copy[moving_car][1]] = 0
+        cars[parking_lot_copy[moving_car][1]] += 1
+        moving_car = move_car_one_left(parking_lot_copy, moving_car)
+        print(parking_lot_copy)
+
+    return moving_car, direction
+
+def move_left_recursion():
+
+
+
+def move_right(parking_lot_copy, moving_car, current_car, count, cars, overwrite, direction):
+    crash, blocking_car = is_crash_right(parking_lot_copy, moving_car)
+    if not crash:  # no crash
+        cars[parking_lot_copy[current_car][1]] = count
+        direction = "rechts"
+        moving_car = move_car_one_right(parking_lot_copy, moving_car)
+    elif crash and not blocking_car:  # crash against the border
+        print("Hello")
+        cars[parking_lot_copy[current_car][1]] = count
+        direction = "links"
+        moving_car = move_car_one_left(parking_lot_copy, moving_car)
+    else:  # another car needs to be moved first
+        pass
+
+    return moving_car, direction
+
+
+def move_car_one_left(parking_lot_copy, moving_car):
     parking_lot_copy[moving_car - 1][1] = parking_lot_copy[moving_car][1]
-    if overwrite:
-        parking_lot_copy[moving_car + 1][1] = 0
+    parking_lot_copy[moving_car + 1][1] = 0
     moving_car -= 1
     return moving_car
 
 
-def move_car_one_right(parking_lot_copy, moving_car, overwrite):
+def move_car_one_right(parking_lot_copy, moving_car):
     parking_lot_copy[moving_car + 2][1] = parking_lot_copy[moving_car][1]
-    if overwrite:
-        parking_lot_copy[moving_car][1] = 0
+    parking_lot_copy[moving_car][1] = 0
     moving_car += 1
     return moving_car
 
