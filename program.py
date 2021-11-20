@@ -2,7 +2,7 @@ from pathlib import Path
 from copy import deepcopy
 
 
-def read_input(filename='parkplatz0.txt'):
+def read_input(filename='parkplatz5.txt'):
     """ Beispieldatei einlesen
     Die Zeilen in Integer und List umwandeln und Zeilenumbrüche mit .strip() entfernen.
     Default ist das Aufgabenbeispiel parkplatz0.txt.
@@ -59,12 +59,13 @@ def make_parkinglot(parked_cars, moving_cars):
 
 def move_cars(parkinglot):
     moving_car = None
-    direction = None
 
     for current_car in range(0, len(parkinglot)):
         parking_lot_copy = deepcopy(parkinglot)
         cars = {}
         count = 0  # for defining moving_car only once and then changing its value for every step
+        recursion = 0
+        direction = None
         if parking_lot_copy[current_car][1] != 0:
             while parking_lot_copy[current_car][1] != 0:
                 count += 1
@@ -72,30 +73,31 @@ def move_cars(parkinglot):
                 if count == 1:
                     if current_car == len(parkinglot) - 1:
                         moving_car = current_car - 1
-                        moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, direction)
+                        moving_car, direction = move_left_recursion(parking_lot_copy, moving_car, current_car, cars, direction)
                         continue
 
                     if current_car == 0:
                         moving_car = current_car
-                        moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, direction)
+                        moving_car, direction = move_right_recursion(parking_lot_copy, moving_car, current_car, cars, direction)
                         continue
 
                     if 0 < current_car < len(parkinglot) - 1:
                         if parking_lot_copy[current_car + 1][1] == parking_lot_copy[current_car][1]:
-                            if count == 1:
-                                moving_car = current_car
-                            moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, direction)
+                            moving_car = current_car
+                            moving_car, direction = move_right_recursion(parking_lot_copy, moving_car, current_car, cars, direction)
                             continue
 
                         elif parking_lot_copy[current_car - 1][1] == parking_lot_copy[current_car][1]:
-                            if count == 1:
-                                moving_car = current_car - 1
-                            moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, direction)
+                            moving_car = current_car - 1
+                            moving_car, direction = move_left_recursion(parking_lot_copy, moving_car, current_car, cars, direction)
+                            continue
                 else:
                     if direction == "links":
-                        moving_car, direction = move_left(parking_lot_copy, moving_car, current_car, count, cars, direction)
-                    else:
-                        moving_car, direction = move_right(parking_lot_copy, moving_car, current_car, count, cars, direction)
+                        moving_car, direction = move_left_recursion(parking_lot_copy, moving_car, current_car, cars, direction)
+                        continue
+                    elif direction == "rechts":
+                        moving_car, direction = move_right_recursion(parking_lot_copy, moving_car, current_car, cars, direction)
+                        continue
 
             print(f"{parking_lot_copy[current_car][0]}: {cars} {direction}")
 
@@ -103,48 +105,48 @@ def move_cars(parkinglot):
             print(f"{parking_lot_copy[current_car][0]}: ")
 
 
-def move_left(parking_lot_copy, moving_car, current_car, count, cars, direction):
+def move_left_recursion(parking_lot_copy, moving_car, current_car, cars, direction):
     crash, blocking_car = is_crash_left(parking_lot_copy, moving_car)
-    if not crash:  # no crash
-        cars[parking_lot_copy[current_car][1]] = count
+    if not crash:
         direction = "links"
-        moving_car = move_car_one_left(parking_lot_copy, moving_car)
-    elif crash and not blocking_car:  # crash against the border
-        cars[parking_lot_copy[current_car][1]] = count
-        direction = "rechts"
-        moving_car = move_car_one_right(parking_lot_copy, moving_car)
-    else:  # another car needs to be moved first
-        print("hello")
-        print(parking_lot_copy)
-        moving_car -= 2
-        move_left(parking_lot_copy, moving_car, current_car, count, cars, direction)
-        print("bye")
         if not cars.get(parking_lot_copy[moving_car][1]):
             cars[parking_lot_copy[moving_car][1]] = 0
         cars[parking_lot_copy[moving_car][1]] += 1
         moving_car = move_car_one_left(parking_lot_copy, moving_car)
-        print(parking_lot_copy)
+    elif crash and not blocking_car:
+        direction = "rechts"
+    else:
+        direction = "links"
+        moving_car -= 2
+        move_left_recursion(parking_lot_copy, moving_car, current_car, cars, direction)
+        moving_car += 2
+        if not cars.get(parking_lot_copy[moving_car][1]):
+            cars[parking_lot_copy[moving_car][1]] = 0
+        cars[parking_lot_copy[moving_car][1]] += 1
+        moving_car = move_car_one_left(parking_lot_copy, moving_car)
 
     return moving_car, direction
 
 
-def move_left_recursion():
-    pass
-
-
-def move_right(parking_lot_copy, moving_car, current_car, count, cars, direction):
+def move_right_recursion(parking_lot_copy, moving_car, current_car, cars, direction):
     crash, blocking_car = is_crash_right(parking_lot_copy, moving_car)
     if not crash:  # no crash
-        cars[parking_lot_copy[current_car][1]] = count
         direction = "rechts"
+        if not cars.get(parking_lot_copy[moving_car][1]):
+            cars[parking_lot_copy[moving_car][1]] = 0
+        cars[parking_lot_copy[moving_car][1]] += 1
         moving_car = move_car_one_right(parking_lot_copy, moving_car)
     elif crash and not blocking_car:  # crash against the border
-        print("Hello")
-        cars[parking_lot_copy[current_car][1]] = count
         direction = "links"
-        moving_car = move_car_one_left(parking_lot_copy, moving_car)
     else:  # another car needs to be moved first
-        pass
+        direction = "rechts"
+        moving_car += 2
+        move_right_recursion(parking_lot_copy, moving_car, current_car, cars, direction)
+        moving_car -= 2
+        if not cars.get(parking_lot_copy[moving_car][1]):
+            cars[parking_lot_copy[moving_car][1]] = 0
+        cars[parking_lot_copy[moving_car][1]] += 1
+        moving_car = move_car_one_right(parking_lot_copy, moving_car)
 
     return moving_car, direction
 
@@ -164,23 +166,22 @@ def move_car_one_right(parking_lot_copy, moving_car):
 
 
 def is_crash_left(parking_lot_copy, moving_car):
-    try:
+    if moving_car - 1 >= 0:
         if parking_lot_copy[moving_car - 1][1] != 0:
             crash = True
             blocking_car = True
-
         else:
             crash = False
             blocking_car = False
         return crash, blocking_car
-    except IndexError:
+    else:
         crash = True
         blocking_car = False
         return crash, blocking_car
 
 
 def is_crash_right(parking_lot_copy, moving_car):
-    try:
+    if moving_car + 2 <= len(parkinglot) - 1:
         if parking_lot_copy[moving_car + 2][1] != 0:
             crash = True
             blocking_car = True
@@ -188,7 +189,7 @@ def is_crash_right(parking_lot_copy, moving_car):
             crash = False
             blocking_car = False
         return crash, blocking_car
-    except IndexError:
+    else:
         crash = True
         blocking_car = False
         return crash, blocking_car
