@@ -2,7 +2,7 @@ from pathlib import Path
 from copy import deepcopy
 
 
-def read_input(filename='parkplatz2.txt'):
+def read_input(filename='parkplatz0.txt'):
     """ Beispieldatei einlesen
     Die Zeilen in Integer und List umwandeln und Zeilenumbrüche mit .strip() entfernen.
     Default ist das Aufgabenbeispiel parkplatz0.txt.
@@ -22,9 +22,8 @@ def read_input(filename='parkplatz2.txt'):
 
 def make_parkinglot(parked_cars, moving_cars):
     """
-    Erstellt aus parked_cars und alphabet die Liste parkinglot mit allen Autos, die ausgeparkt werden sollen.
-    Erstellt aus moving_cars ein dict(), dessen key der Buchstabe des Autos und value die Nummer des Parkplatzes ist.
-    Gibt den Autos auf dem Parkplatz einen Index und prüft nacheinander alle Autos, ob sie ausparken können oder nicht.
+    Erstellt aus parked_cars und alphabet die Liste parkinglot mit allen Autos, die ausgeparkt werden sollen und dem
+    dazugehörigen Wert, der angibt, ob die Stelle blockiert wird oder frei ist.
     """
 
     alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
@@ -42,13 +41,12 @@ def make_parkinglot(parked_cars, moving_cars):
 
     count = 0
     for letter in alphabet:
-        array = [letter]
-        array.append(0)
+        spot = [letter, 0]
         for key, value in occupiedlot.items():
             if value == count:
-                array.append(key.upper())
-                array.remove(0)
-        parkinglot.append(array)
+                spot.append(key.upper())
+                spot.remove(0)
+        parkinglot.append(spot)
         if letter == end:
             break
         count += 1
@@ -58,12 +56,14 @@ def make_parkinglot(parked_cars, moving_cars):
 
 
 def move_cars(parkinglot):
+    """
+    Geht durch den gesamten Parkplatz und entscheidet, was getan werden muss, damit die Autos ausparken können.
+    """
     moving_car = None
-
     for current_car in range(0, len(parkinglot)):
         parking_lot_copy = deepcopy(parkinglot)
         cars = {}
-        count = 0  # for defining moving_car only once and then changing its value for every step
+        count = 0
         direction = None
         if parking_lot_copy[current_car][1] != 0:
             while parking_lot_copy[current_car][1] != 0:
@@ -105,6 +105,10 @@ def move_cars(parkinglot):
 
 
 def move_left_recursion(parking_lot_copy, moving_car, current_car, cars, direction):
+    """
+    Prüft, inwiefern Autos nach links verschoben werden können und verschiebt sie, sobald genügend Platz vorhanden ist.
+    """
+
     crash, blocking_car = is_crash_left(parking_lot_copy, moving_car)
     if not crash:
         direction = "links"
@@ -128,16 +132,19 @@ def move_left_recursion(parking_lot_copy, moving_car, current_car, cars, directi
 
 
 def move_right_recursion(parking_lot_copy, moving_car, current_car, cars, direction):
+    """
+    Prüft, inwiefern Autos nach rechts verschoben werden können und verschiebt sie, sobald genügend Platz vorhanden ist.
+    """
     crash, blocking_car = is_crash_right(parking_lot_copy, moving_car)
-    if not crash:  # no crash
+    if not crash:
         direction = "rechts"
         if not cars.get(parking_lot_copy[moving_car][1]):
             cars[parking_lot_copy[moving_car][1]] = 0
         cars[parking_lot_copy[moving_car][1]] += 1
         moving_car = move_car_one_right(parking_lot_copy, moving_car)
-    elif crash and not blocking_car:  # crash against the border
+    elif crash and not blocking_car:
         direction = "links"
-    else:  # another car needs to be moved first
+    else:
         direction = "rechts"
         moving_car += 2
         move_right_recursion(parking_lot_copy, moving_car, current_car, cars, direction)
@@ -151,6 +158,10 @@ def move_right_recursion(parking_lot_copy, moving_car, current_car, cars, direct
 
 
 def move_car_one_left(parking_lot_copy, moving_car):
+    """
+    Verschiebt das Auto um eine Stelle nach links.
+    """
+
     parking_lot_copy[moving_car - 1][1] = parking_lot_copy[moving_car][1]
     parking_lot_copy[moving_car + 1][1] = 0
     moving_car -= 1
@@ -158,6 +169,9 @@ def move_car_one_left(parking_lot_copy, moving_car):
 
 
 def move_car_one_right(parking_lot_copy, moving_car):
+    """
+    Verschiebt das Auto um eine Stelle nach rechts.
+    """
     parking_lot_copy[moving_car + 2][1] = parking_lot_copy[moving_car][1]
     parking_lot_copy[moving_car][1] = 0
     moving_car += 1
@@ -165,6 +179,10 @@ def move_car_one_right(parking_lot_copy, moving_car):
 
 
 def is_crash_left(parking_lot_copy, moving_car):
+    """
+    Prüft, ob das Auto auf der linken Seite durch eine Grenze blockiert wird oder nicht.
+    Falls daneben keine Grenze liegt, wird überprüft, ob es durch ein anderes Auto blockiert wird.
+    """
     if moving_car - 1 >= 0:
         if parking_lot_copy[moving_car - 1][1] != 0:
             crash = True
@@ -180,6 +198,10 @@ def is_crash_left(parking_lot_copy, moving_car):
 
 
 def is_crash_right(parking_lot_copy, moving_car):
+    """
+    Prüft, ob das Auto auf der rechten Seite durch eine Grenze blockiert wird oder nicht.
+    Falls daneben keine Grenze liegt, wird überprüft, ob es durch ein anderes Auto blockiert wird.
+    """
     if moving_car + 2 <= len(parkinglot) - 1:
         if parking_lot_copy[moving_car + 2][1] != 0:
             crash = True
@@ -195,6 +217,10 @@ def is_crash_right(parking_lot_copy, moving_car):
 
 
 def print_result(parking_lot_copy, current_car, cars, direction):
+    """
+    Macht das dictionary zu einer Liste und formatiert die Ausgabe so, dass die Autos in der richtigen Reihenfolge
+    genannt werden.
+    """
     solution = []
     for key, value in cars.items():
         move = f"{key} {value} {direction}"
