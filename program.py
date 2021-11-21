@@ -2,7 +2,7 @@ from pathlib import Path
 from copy import deepcopy
 
 
-def read_input(filename='parkplatz5.txt'):
+def read_input(filename='parkplatz2.txt'):
     """ Beispieldatei einlesen
     Die Zeilen in Integer und List umwandeln und Zeilenumbrüche mit .strip() entfernen.
     Default ist das Aufgabenbeispiel parkplatz0.txt.
@@ -13,9 +13,9 @@ def read_input(filename='parkplatz5.txt'):
         moving_cars_total = file_in.readline().strip()
         moving_cars = [line.strip() for line in file_in.readlines()]
 
-    print(parked_cars)
-    print(moving_cars_total)
-    print(moving_cars)
+    print(f"Parkende Autos: {parked_cars}")
+    print(f"Anzahl an Schiebeautos: {moving_cars_total}")
+    print(f"Position der Schiebeautos: {moving_cars}")
 
     return parked_cars, moving_cars
 
@@ -53,7 +53,7 @@ def make_parkinglot(parked_cars, moving_cars):
             break
         count += 1
 
-    print(parkinglot)
+    print(f"Layout Parkplatz: {parkinglot}\n")
     return parkinglot
 
 
@@ -64,7 +64,6 @@ def move_cars(parkinglot):
         parking_lot_copy = deepcopy(parkinglot)
         cars = {}
         count = 0  # for defining moving_car only once and then changing its value for every step
-        recursion = 0
         direction = None
         if parking_lot_copy[current_car][1] != 0:
             while parking_lot_copy[current_car][1] != 0:
@@ -99,7 +98,7 @@ def move_cars(parkinglot):
                         moving_car, direction = move_right_recursion(parking_lot_copy, moving_car, current_car, cars, direction)
                         continue
 
-            print(f"{parking_lot_copy[current_car][0]}: {cars} {direction}")
+            print_result(parking_lot_copy, current_car, cars, direction)
 
         else:
             print(f"{parking_lot_copy[current_car][0]}: ")
@@ -193,6 +192,18 @@ def is_crash_right(parking_lot_copy, moving_car):
         crash = True
         blocking_car = False
         return crash, blocking_car
+
+
+def print_result(parking_lot_copy, current_car, cars, direction):
+    solution = []
+    for key, value in cars.items():
+        move = f"{key} {value} {direction}"
+        solution.append(move)
+    solution.sort()
+    if direction == "rechts":
+        solution.reverse()
+    result = ", ".join(solution)
+    print(f"{parking_lot_copy[current_car][0]}: {result}")
 
 
 if __name__ == '__main__':
